@@ -4,9 +4,13 @@ import { withStyles } from '@material-ui/core';
 import Header from '../Header';
 
 const propTypes = {
-  title: PropTypes.string.isRequired,
+  title: PropTypes.string,
   children: PropTypes.node.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+};
+
+const defaultProps = {
+  title: '',
 };
 
 const styles = theme => ({
@@ -28,7 +32,7 @@ const styles = theme => ({
 function Page({ classes, title, children }) {
   return (
     <div className={classes.container}>
-      <Header title={title} />
+      {title !== '' && <Header title={title} />}
       <div className={classes.content}>
         {children}
       </div>
@@ -37,6 +41,7 @@ function Page({ classes, title, children }) {
 }
 
 Page.propTypes = propTypes;
+Page.defaultProps = defaultProps;
 
 const enhance = withStyles(styles);
 

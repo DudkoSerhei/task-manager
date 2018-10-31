@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'lodash/fp';
+import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, IconButton } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, IconButton, Tooltip } from '@material-ui/core';
 import { DateRange } from '@material-ui/icons';
 import PageActions from '../PageActions';
 
 const propTypes = {
   title: PropTypes.string,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  history: PropTypes.instanceOf(Object).isRequired,
 };
 
 const defaultProps = {
@@ -28,13 +31,15 @@ const styles = theme => ({
   },
 });
 
-function Header({ classes, title }) {
+function Header({ classes, title, history }) {
   return (
     <AppBar position="static">
       <Toolbar>
-        <IconButton className={classes.button}>
-          <DateRange color="inherit" />
-        </IconButton>
+        <Tooltip title="Logo">
+          <IconButton onClick={() => history.push('/')} className={classes.button}>
+            <DateRange color="inherit" />
+          </IconButton>
+        </Tooltip>
         <Typography className={classes.title} component="h2">{title}</Typography>
         <PageActions className={classes.actions} />
       </Toolbar>
@@ -45,6 +50,9 @@ function Header({ classes, title }) {
 Header.propTypes = propTypes;
 Header.defaultProps = defaultProps;
 
-const enhance = withStyles(styles);
+const enhance = compose(
+  withStyles(styles),
+  withRouter,
+);
 
 export default enhance(Header);

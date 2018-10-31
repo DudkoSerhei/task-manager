@@ -1,24 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { compose } from 'lodash/fp';
 import { withStyles } from '@material-ui/core/styles';
-import { Menu, MenuItem, IconButton, Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Slide } from '@material-ui/core';
+import { withRouter } from 'react-router-dom';
+import { Menu, MenuItem, IconButton, Tooltip } from '@material-ui/core';
 import { FilterList, AccountCircle } from '@material-ui/icons';
+import { FilterDialog } from '../Dialogs';
+import Utils from '../../utils';
 
 const propTypes = {
   className: PropTypes.string,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  history: PropTypes.instanceOf(Object).isRequired,
 };
 
 const defaultProps = {
   className: '',
 };
-
-function Transition(props) {
-  return <Slide direction="up" {...props} />;
-}
-
-const FILTERS = ['UserName', 'Email', 'Status'];
 
 const styles = theme => ({
   container: {
@@ -32,19 +31,6 @@ const styles = theme => ({
       marginRight: 0,
     },
   },
-  dialogTitle: {
-    color: theme.palette.primary.dark,
-  },
-  dialogContent: {
-    overflowY: 'visible',
-  },
-  textField: {
-    color: theme.palette.primary.dark,
-    width: '250px',
-  },
-  filterButton: {
-    color: theme.palette.primary.dark,
-  },
   menuItem: {
     color: theme.palette.primary.dark,
     width: '120px',
@@ -54,7 +40,6 @@ const styles = theme => ({
 class PageActions extends React.Component {
   state = {
     isFilterOpen: false,
-    currentFilter: FILTERS[0],
     anchorEl: null,
   }
 
@@ -70,18 +55,6 @@ class PageActions extends React.Component {
     });
   };
 
-  onFilterChange = (event) => {
-    this.setState({
-      currentFilter: event.target.value,
-    });
-  };
-
-  onFilterReset = () => {
-    this.setState({
-      currentFilter: FILTERS[0],
-    });
-  }
-
   onMenuOpen = (event) => {
     this.setState({
       anchorEl: event.currentTarget,
@@ -95,80 +68,33 @@ class PageActions extends React.Component {
   };
 
   render() {
-    const { classes, className } = this.props;
-    const { isFilterOpen, currentFilter, anchorEl } = this.state;
+    const { classes, className, history } = this.props;
+    const { isFilterOpen, anchorEl } = this.state;
 
     return (
       <div className={cn(classes.container, className)}>
-        <IconButton
-          className={classes.button}
-          onClick={this.onFilterOpen}
-        >
-          <FilterList color="inherit" />
-        </IconButton>
-        <IconButton
-          aria-owns={anchorEl ? 'simple-menu' : undefined}
-          aria-haspopup="true"
-          className={classes.button}
-          onClick={this.onMenuOpen}
-        >
-          <AccountCircle color="inherit" />
-        </IconButton>
-        <Dialog
-          open={isFilterOpen}
-          TransitionComponent={Transition}
-          keepMounted
-          fullWidth
-          onClose={this.onFilterClose}
-          aria-labelledby="dialog-title"
-        >
-          <DialogTitle
-            id="alert-dialog-slide-title"
-            className={classes.dialogTitle}
+        <Tooltip title="Filter">
+          <IconButton
+            className={classes.button}
+            onClick={this.onFilterOpen}
           >
-            Filter tasks
-          </DialogTitle>
-          <DialogContent className={classes.dialogContent}>
-            <TextField
-              select
-              label="Filter by"
-              className={classes.textField}
-              value={currentFilter}
-              onChange={this.onFilterChange}
-              helperText="Please select your filter"
-              variant="outlined"
-            >
-              {FILTERS.map(filter => (
-                <MenuItem key={filter} value={filter}>
-                  {filter}
-                </MenuItem>
-              ))}
-            </TextField>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              className={classes.filterButton}
-              variant="outlined"
-              onClick={this.onFilterReset}
-            >
-              Reset Filters
-            </Button>
-            <Button
-              className={classes.filterButton}
-              variant="outlined"
-              onClick={this.onFilterClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              className={classes.filterButton}
-              variant="outlined"
-              onClick={this.onFilterClose}
-            >
-              Filter
-            </Button>
-          </DialogActions>
-        </Dialog>
+            <FilterList color="inherit" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="User Menu">
+          <IconButton
+            aria-owns={anchorEl ? 'simple-menu' : undefined}
+            aria-haspopup="true"
+            className={classes.button}
+            onClick={this.onMenuOpen}
+          >
+            <AccountCircle color="inherit" />
+          </IconButton>
+        </Tooltip>
+        <FilterDialog
+          isOpen={isFilterOpen}
+          onClose={this.onFilterClose}
+        />
         <Menu
           id="login-menu"
           anchorEl={anchorEl}
@@ -177,9 +103,9 @@ class PageActions extends React.Component {
         >
           <MenuItem
             className={classes.menuItem}
-            onClick={this.onMenuClose}
+            onClick={Utils.invokeAll(() => history.push('/login'), this.onMenuClose)}
           >
-            Log in
+            Login
           </MenuItem>
         </Menu>
       </div>
@@ -190,6 +116,9 @@ class PageActions extends React.Component {
 PageActions.propTypes = propTypes;
 PageActions.defaultProps = defaultProps;
 
-const enhance = withStyles(styles);
+const enhance = compose(
+  withStyles(styles),
+  withRouter,
+);
 
 export default enhance(PageActions);
