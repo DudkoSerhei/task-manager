@@ -2,12 +2,12 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 // Route imports
-import HelloWorld from '../components/HelloWorld';
+import TaskPage from './tasks';
 
 export function Router() {
   return (
     <Switch>
-      <Route path="/" component={HelloWorld} />
+      <Route path="/" component={TaskPage} />
     </Switch>
   );
 }
