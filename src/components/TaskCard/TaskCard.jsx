@@ -1,28 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Card, CardMedia, CardContent, Typography, IconButton, Badge, Tooltip, CardActions, Menu, MenuItem } from '@material-ui/core';
-import { CheckCircle, Clear, MoreVert } from '@material-ui/icons';
+import { Card, CardMedia, CardContent, Typography, IconButton, Badge, Tooltip, CardActions, Menu, MenuItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { CheckCircle, Clear, MoreVert, Edit } from '@material-ui/icons';
+import { EditDialog } from '../../components/Dialogs';
 import defaultSrc from '../../images/task.png';
 import Utils from '../../utils';
 
 const propTypes = {
+  id: PropTypes.number.isRequired,
   userName: PropTypes.string.isRequired,
   email: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   src: PropTypes.string,
-  status: PropTypes.bool,
-  actions: PropTypes.arrayOf(PropTypes.shape({
-    label: PropTypes.string,
-    onClick: PropTypes.func,
-  })),
+  status: PropTypes.number,
+  edit: PropTypes.bool,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 const defaultProps = {
   src: defaultSrc,
-  status: false,
-  actions: [],
+  status: 0,
+  edit: false,
 };
 
 const styles = theme => ({
@@ -30,8 +29,9 @@ const styles = theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     width: '100%',
-    height: '30%',
+    height: '100%',
     overflow: 'visible',
+    position: 'relative',
   },
   media: {
     width: '220px',
@@ -52,8 +52,19 @@ const styles = theme => ({
     color: theme.palette.primary.dark,
   },
   badge: {
+    right: 'auto',
+    left: '-35px',
+    top: '-25px',
     backgroundColor: theme.palette.primary.dark,
     color: theme.palette.primary.text,
+  },
+  cardContent: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  actionColor: {
+    color: theme.palette.primary.main,
   },
 });
 
@@ -61,11 +72,18 @@ class TaskCard extends React.Component {
   state = {
     currentStatus: this.props.status,
     anchorEl: null,
+    isEditDialogOpen: false,
   }
 
-  onToogleStatus = () => {
+  onStatusAprove = () => {
     this.setState({
-      currentStatus: !this.state.currentStatus,
+      currentStatus: 10,
+    });
+  };
+
+  onStatusUndone = () => {
+    this.setState({
+      currentStatus: 0,
     });
   };
 
@@ -77,19 +95,38 @@ class TaskCard extends React.Component {
     this.setState({ anchorEl: null });
   };
 
+  onEditDialogOpen = () => {
+    this.setState({
+      isEditDialogOpen: true,
+    });
+  };
+
+  onEditDialogClose = () => {
+    this.setState({
+      isEditDialogOpen: false,
+    });
+  };
+
   render() {
     const {
       userName, email, description,
-      actions, classes, src,
+      edit, classes, src, id,
     } = this.props;
-    const { anchorEl, currentStatus } = this.state;
+    const { anchorEl, currentStatus, isEditDialogOpen } = this.state;
 
     return (
       <Card className={classes.card}>
         <CardContent>
-          <Typography component="h3" className={classes.userName}>
-            {userName}
-          </Typography>
+          {currentStatus === 10 ?
+            <Badge classes={{ badge: classes.badge }} badgeContent={<CheckCircle />}>
+              <Typography component="h3" className={classes.userName}>
+                {userName}
+              </Typography>
+            </Badge> :
+            <Typography component="h3" className={classes.userName}>
+              {userName}
+            </Typography>
+          }
           <Typography component="h5" className={classes.email}>
             {email}
           </Typography>
@@ -97,34 +134,22 @@ class TaskCard extends React.Component {
             {Utils.cutText(description, 500)}
           </Typography>
         </CardContent>
-        {currentStatus ?
-          <Badge classes={{ badge: classes.badge }} badgeContent={<CheckCircle />}>
-            <CardMedia
-              component="img"
-              alt="Task Image"
-              className={classes.media}
-              image={src}
-              title="Task Image"
-            />
-          </Badge> :
-          <CardMedia
-            component="img"
-            alt="Task Image"
-            className={classes.media}
-            image={src}
-            title="Task Image"
-          />
-        }
-        {actions.length > 0 &&
-          <CardActions>
-            <Tooltip title={currentStatus ? 'Approve' : 'Deselect'}>
+        <CardMedia
+          component="img"
+          alt="Task Image"
+          className={classes.media}
+          image={src}
+          title="Task Image"
+        />
+        {edit &&
+          <CardActions className={classes.cardContent}>
+            <Tooltip title={currentStatus !== 10 ? 'Done' : 'Undone'}>
               <IconButton
-                className={classes.iconButton}
-                onClick={this.onToogleStatus}
+                onClick={currentStatus !== 10 ? this.onStatusAprove : this.onStatusUndone}
               >
-                {currentStatus ?
-                  <CheckCircle color="inherit" /> :
-                  <Clear color="inherit" />
+                {currentStatus !== 10 ?
+                  <CheckCircle className={classes.actionColor} /> :
+                  <Clear className={classes.actionColor} />
                 }
               </IconButton>
             </Tooltip>
@@ -132,10 +157,9 @@ class TaskCard extends React.Component {
               <IconButton
                 aria-owns={anchorEl ? 'action-menu' : undefined}
                 aria-haspopup="true"
-                className={classes.iconButton}
                 onClick={this.onMenuOpen}
               >
-                <MoreVert color="inherit" />
+                <MoreVert className={classes.actionColor} />
               </IconButton>
             </Tooltip>
             <Menu
@@ -144,17 +168,29 @@ class TaskCard extends React.Component {
               open={Boolean(anchorEl)}
               onClose={this.onMenuClose}
             >
-              {actions.map(item => (
-                <MenuItem
-                  key={item.label}
-                  onClick={Utils.invokeAll(item.onClick, this.onMenuClose)}
-                >
-                  {item.label}
-                </MenuItem>
-              ))}
+              <MenuItem
+                onClick={Utils.invokeAll(this.onEditDialogOpen, this.onMenuClose)}
+              >
+                <ListItemIcon className={classes.actionColor}>
+                  <Edit />
+                </ListItemIcon>
+                <ListItemText
+                  classes={{ primary: classes.actionColor }}
+                  inset
+                  primary="Edit"
+                />
+              </MenuItem>
             </Menu>
           </CardActions>
         }
+        <EditDialog
+          isOpen={isEditDialogOpen}
+          onClose={this.onEditDialogClose}
+          id={id}
+          userName={userName}
+          text={description}
+          status={currentStatus}
+        />
       </Card>
     );
   }

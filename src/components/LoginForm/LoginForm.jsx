@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'lodash/fp';
+import { connect } from 'react-redux';
+import { isEqual } from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, Button, Snackbar, Slide } from '@material-ui/core';
-import { AccountBox } from '@material-ui/icons';
+import { TextField, Button, Snackbar, Slide, InputAdornment, IconButton } from '@material-ui/core';
+import { AccountBox, VisibilityOff, Visibility, Person } from '@material-ui/icons';
+import { USER } from '../../env';
+import { setUser } from '../../actions';
 
 const propTypes = {
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
+  setUser: PropTypes.func.isRequired,
   history: PropTypes.instanceOf(Object).isRequired,
 };
 
@@ -23,7 +28,7 @@ const styles = theme => ({
     width: '350px',
     height: '500px',
     border: `3px solid ${theme.palette.primary.dark}`,
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.main,
     borderRadius: '15px',
     padding: '30px 15px',
     margin: '0 auto',
@@ -48,14 +53,36 @@ const styles = theme => ({
     borderColor: theme.palette.primary.dark,
     backgroundColor: theme.palette.primary.text,
     marginTop: '40px',
+    '&:hover': {
+      backgroundColor: theme.palette.primary.gray,
+    },
+  },
+  buttonInput: {
+    color: theme.palette.primary.main,
+  },
+  iconInput: {
+    color: theme.palette.primary.main,
+    zIndex: 5,
+    marginRight: '12px',
+  },
+  message: {
+    textAlign: 'center',
   },
 });
 
 class LoginForm extends React.Component {
   state = {
-    email: '',
+    username: '',
     password: '',
     isSnackbarOpen: false,
+    showPassword: false,
+    snackbarText: '',
+  };
+
+  handleClickShowPassword = () => {
+    this.setState({
+      showPassword: !this.state.showPassword,
+    });
   };
 
   handleOpen = () => {
@@ -67,12 +94,15 @@ class LoginForm extends React.Component {
   handleClose = () => {
     this.setState({
       isSnackbarOpen: false,
+      username: '',
+      password: '',
+      snackbarText: '',
     });
   };
 
-  handleEmailChange = (event) => {
+  handleUserNameChange = (event) => {
     this.setState({
-      email: event.target.value,
+      username: event.target.value,
     });
   };
 
@@ -83,43 +113,57 @@ class LoginForm extends React.Component {
   };
 
   handleLogin = () => {
-    const { email, password } = this.state;
+    const { username, password } = this.state;
 
-    if (email === 'admin' && password === '123') {
-      this.props.history.push('/');
-    }
+    const user = { username, password };
 
-    if (email !== 'admin' || password !== '123') {
+    if (isEqual(user, USER)) {
+      this.props.setUser(user);
+      this.setState({
+        snackbarText: 'Login successfull!',
+      });
+      this.handleOpen();
+      setTimeout(() => this.props.history.push('/'), 1000);
+    } else {
+      this.setState({
+        snackbarText: 'Wrong username or password. Check it!',
+      });
       this.handleOpen();
     }
-
-    return { email, password };
   }
 
   render() {
     const { classes } = this.props;
-    const { isSnackbarOpen, email, password } = this.state;
+    const {
+      isSnackbarOpen, username, password,
+      showPassword, snackbarText,
+    } = this.state;
 
     return (
       <form className={classes.form} onSubmit={this.handleLogin}>
         <AccountBox className={classes.icon} />
         <TextField
-          value={email}
-          label="Email"
+          value={username}
+          label="Username"
           className={classes.textField}
           InputProps={{
             classes: {
               notchedOutline: classes.textFieldOutline,
               input: classes.textFieldInput,
             },
+            endAdornment: (
+              <InputAdornment position="end">
+                <Person className={classes.iconInput} />
+              </InputAdornment>
+            ),
           }}
-          onChange={this.handleEmailChange}
+          onChange={this.handleUserNameChange}
           margin="normal"
           variant="outlined"
         />
         <TextField
           value={password}
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           label="Passsword"
           className={classes.textField}
           InputProps={{
@@ -127,6 +171,16 @@ class LoginForm extends React.Component {
               notchedOutline: classes.textFieldOutline,
               input: classes.textFieldInput,
             },
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  className={classes.buttonInput}
+                  onClick={this.handleClickShowPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
           }}
           onChange={this.handlePasswordChange}
           margin="normal"
@@ -148,9 +202,9 @@ class LoginForm extends React.Component {
           onClose={this.handleClose}
           TransitionComponent={TransitionDown}
           ContentProps={{
-            'aria-describedby': 'message-id',
+            'aria-describedby': 'login-message',
           }}
-          message={<span id="message-id">Wrong username or password. Check it!</span>}
+          message={<span id="login-message">{snackbarText}</span>}
         />
       </form>
     );
@@ -159,9 +213,16 @@ class LoginForm extends React.Component {
 
 LoginForm.propTypes = propTypes;
 
+const stateToProps = () => ({});
+
+const dispatchToProps = dispatch => ({
+  setUser: (...args) => dispatch(setUser(...args)),
+});
+
 const enhance = compose(
   withStyles(styles),
   withRouter,
+  connect(stateToProps, dispatchToProps),
 );
 
 export default enhance(LoginForm);

@@ -1,11 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'lodash/fp';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
-import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Slide, MenuItem } from '@material-ui/core';
+import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, MenuItem } from '@material-ui/core';
+import Transition from './Transition';
+import { setFilters } from '../../actions';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
+  setFilters: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
@@ -21,8 +26,13 @@ const styles = theme => ({
     overflowY: 'visible',
   },
   textField: {
+    display: 'flex',
     color: theme.palette.primary.dark,
     width: '250px',
+    marginBottom: '25px',
+    '&:last-child': {
+      marginBottom: 0,
+    },
   },
   filterButton: {
     color: theme.palette.primary.dark,
@@ -38,15 +48,19 @@ const styles = theme => ({
   },
 });
 
-function Transition(props) {
-  return <Slide direction="up" {...props} />;
-}
-
 const FILTERS = ['UserName', 'Email', 'Status'];
+const SORT = ['Ascending', 'Decrease'];
+
+const defaultValues = () => ({
+  filter: FILTERS[0],
+  sort: SORT[0],
+});
 
 class FilterDialog extends React.Component {
   state = {
     currentFilter: FILTERS[0],
+    currentSort: SORT[0],
+    values: defaultValues(),
   }
 
   handleFilter = (event) => {
@@ -55,30 +69,47 @@ class FilterDialog extends React.Component {
     });
   };
 
+  handleSort = (event) => {
+    this.setState({
+      currentSort: event.target.value,
+    });
+  };
+
   handleReset = () => {
     this.setState({
       currentFilter: FILTERS[0],
+      currentSort: SORT[0],
+      values: defaultValues(),
     });
+
+    this.props.setFilters({});
   }
 
   handleClose = () => {
     this.setState({
       currentFilter: FILTERS[0],
+      currentSort: SORT[0],
+      values: defaultValues(),
     });
 
+    this.props.setFilters({});
     this.props.onClose();
   }
 
   handleApply = () => {
-    const { currentFilter } = this.state;
+    const { currentFilter, currentSort, values } = this.state;
 
-    console.log(currentFilter, 'currentFilter');
+    this.setState({
+      values: { filter: currentFilter, sort: currentSort },
+    });
+
+    this.props.setFilters(values);
     this.props.onClose();
   }
 
   render() {
-    const { classes, isOpen, onClose } = this.props;
-    const { currentFilter } = this.state;
+    const { classes, isOpen } = this.props;
+    const { currentFilter, currentSort } = this.state;
 
     return (
       <Dialog
@@ -86,7 +117,7 @@ class FilterDialog extends React.Component {
         TransitionComponent={Transition}
         keepMounted
         fullWidth
-        onClose={onClose}
+        onClose={this.handleClose}
         aria-labelledby="filter-dialog-title"
       >
         <DialogTitle
@@ -108,6 +139,21 @@ class FilterDialog extends React.Component {
             {FILTERS.map(filter => (
               <MenuItem key={filter} value={filter}>
                 {filter}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            label="Sort by"
+            className={classes.textField}
+            value={currentSort}
+            onChange={this.handleSort}
+            helperText="Please select your sort type"
+            variant="outlined"
+          >
+            {SORT.map(sort => (
+              <MenuItem key={sort} value={sort}>
+                {sort}
               </MenuItem>
             ))}
           </TextField>
@@ -143,6 +189,15 @@ class FilterDialog extends React.Component {
 FilterDialog.propTypes = propTypes;
 FilterDialog.defaultProps = defaultProps;
 
-const enhance = withStyles(styles);
+const stateToProps = () => ({});
+
+const dispatchToProps = dispatch => ({
+  setFilters: (...args) => dispatch(setFilters(...args)),
+});
+
+const enhance = compose(
+  withStyles(styles),
+  connect(stateToProps, dispatchToProps),
+);
 
 export default enhance(FilterDialog);

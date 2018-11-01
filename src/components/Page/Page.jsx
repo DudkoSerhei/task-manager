@@ -24,7 +24,7 @@ const styles = theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    height: '100vh',
+    height: '100%',
     padding: '50px 200px',
   },
 });

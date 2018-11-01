@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Slide, Typography } from '@material-ui/core';
+import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import Transition from './Transition';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
@@ -13,10 +14,6 @@ const propTypes = {
 const defaultProps = {
   onClose: () => {},
 };
-
-function Transition(props) {
-  return <Slide direction="up" {...props} />;
-}
 
 const styles = theme => ({
   dialogTitle: {
@@ -92,8 +89,36 @@ class CreateTaskDialog extends React.Component {
       description: '',
       file: {},
       isViewOpen: false,
+      usernameError: false,
+      emailError: false,
+      descriptionError: false,
+      fileError: true,
     };
   }
+
+  onUserNameValidate = () => {
+    if (this.state.userName === '') {
+      this.setState({ usernameError: true });
+    } else {
+      this.setState({ usernameError: false });
+    }
+  };
+
+  onEmailValidate = () => {
+    if (this.state.email === '') {
+      this.setState({ emailError: true });
+    } else {
+      this.setState({ emailError: false });
+    }
+  };
+
+  onDescriptionValidate = () => {
+    if (this.state.description === '') {
+      this.setState({ descriptionError: true });
+    } else {
+      this.setState({ descriptionError: false });
+    }
+  };
 
   handleUserNameChange = (event) => {
     this.setState({
@@ -119,6 +144,9 @@ class CreateTaskDialog extends React.Component {
       email: '',
       description: '',
       file: {},
+      emailError: false,
+      usernameError: false,
+      descriptionError: false,
     });
 
     this.props.onClose();
@@ -150,6 +178,7 @@ class CreateTaskDialog extends React.Component {
 
     this.setState({
       file: { url: file.name, data: formData },
+      fileError: false,
     });
   };
 
@@ -169,7 +198,8 @@ class CreateTaskDialog extends React.Component {
     const { classes, isOpen } = this.props;
     const {
       userName, email, description,
-      file, isViewOpen,
+      file, isViewOpen, usernameError,
+      emailError, fileError, descriptionError,
     } = this.state;
 
     return (
@@ -195,6 +225,8 @@ class CreateTaskDialog extends React.Component {
                 label="User name"
                 className={classes.textField}
                 onChange={this.handleUserNameChange}
+                onBlur={this.onUserNameValidate}
+                error={usernameError}
                 helperText="Username for assign this task"
                 margin="normal"
                 variant="outlined"
@@ -204,6 +236,8 @@ class CreateTaskDialog extends React.Component {
                 label="Email"
                 className={classes.textField}
                 onChange={this.handleEmailChange}
+                onBlur={this.onEmailValidate}
+                error={emailError}
                 helperText="Email for this user"
                 margin="normal"
                 variant="outlined"
@@ -214,6 +248,8 @@ class CreateTaskDialog extends React.Component {
               label="Description"
               className={classes.textFieldMulti}
               onChange={this.handleDescriptionChange}
+              onBlur={this.onDescriptionValidate}
+              error={descriptionError}
               helperText="Description for this task"
               margin="normal"
               variant="outlined"
@@ -247,6 +283,10 @@ class CreateTaskDialog extends React.Component {
             className={classes.button}
             variant="outlined"
             onClick={this.handlePreview}
+            disabled={userName === '' || email === '' ||
+              description === '' || file === {} || fileError ||
+              usernameError || emailError || descriptionError
+            }
           >
             Preview
           </Button>
@@ -261,6 +301,10 @@ class CreateTaskDialog extends React.Component {
             className={classes.button}
             variant="outlined"
             onClick={this.handleCreate}
+            disabled={userName === '' || email === '' ||
+              description === '' || file === {} || fileError ||
+              usernameError || emailError || descriptionError
+            }
           >
             Create
           </Button>
