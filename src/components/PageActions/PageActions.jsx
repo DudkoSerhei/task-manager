@@ -5,9 +5,9 @@ import { connect } from 'react-redux';
 import { compose } from 'lodash/fp';
 import { withStyles } from '@material-ui/core/styles';
 import { withRouter, locationProps } from 'react-router-dom';
-import { Menu, MenuItem, IconButton, Tooltip, ListItemIcon, ListItemText, Snackbar, Slide } from '@material-ui/core';
+import { Menu, MenuItem, IconButton, Tooltip, ListItemIcon, ListItemText, Snackbar } from '@material-ui/core';
 import { FilterList, AccountCircle, Input, PowerSettingsNew, Face } from '@material-ui/icons';
-import { FilterDialog } from '../Dialogs';
+import { FilterDialog, Transition } from '../Dialogs';
 import { setUser } from '../../actions';
 import { UserShape } from '../../shapes';
 import Utils from '../../utils';
@@ -50,10 +50,6 @@ const styles = theme => ({
     color: theme.palette.primary.dark,
   },
 });
-
-function TransitionDown(props) {
-  return <Slide {...props} direction="down" />;
-}
 
 class PageActions extends React.Component {
   state = {
@@ -175,7 +171,7 @@ class PageActions extends React.Component {
           }}
           open={isSnackbarOpen}
           onClose={this.onSnackbarClose}
-          TransitionComponent={TransitionDown}
+          TransitionComponent={Transition}
           ContentProps={{
             'aria-describedby': 'logout-message',
           }}

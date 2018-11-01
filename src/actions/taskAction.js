@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../env';
+import { API_URL, DEVELOPER } from '../env';
 import ACTIONS from '../data/TasksConstants';
 
 export const fetchTasksStart = () => ({
@@ -21,14 +21,14 @@ export const fetchTasksError = error => ({
 });
 
 export const fetchTasks = (page, sortDirection, sortField) => (dispatch) => {
-  const data = {
+  const params = {
     page,
     sort_direction: sortDirection,
     sort_field: sortField,
   };
 
   dispatch(fetchTasksStart());
-  axios.get(`${API_URL}`, { data })
+  axios.get(`${API_URL}/${DEVELOPER}`, { params })
     .then((response) => {
       dispatch(fetchTasksSuccess(response.data));
     })
@@ -66,7 +66,7 @@ export const createTask = task => (dispatch) => {
   };
 
   dispatch(createTaskStart());
-  axios.post(`${API_URL}/create`, { data })
+  axios.post(`${API_URL}/create/${DEVELOPER}`, data)
     .then((response) => {
       dispatch(createTaskSuccess(response.data));
     })
@@ -98,7 +98,7 @@ export const editTask = (id, task) => (dispatch) => {
   };
 
   dispatch(editTaskStart());
-  axios.post(`${API_URL}/edit/${id}`, { data })
+  axios.post(`${API_URL}/edit/${id}/${DEVELOPER}`, data)
     .then((response) => {
       dispatch(editTaskSuccess(response.data));
     })

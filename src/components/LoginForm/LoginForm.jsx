@@ -5,8 +5,9 @@ import { connect } from 'react-redux';
 import { isEqual } from 'lodash';
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, Button, Snackbar, Slide, InputAdornment, IconButton } from '@material-ui/core';
+import { TextField, Button, Snackbar, InputAdornment, IconButton } from '@material-ui/core';
 import { AccountBox, VisibilityOff, Visibility, Person } from '@material-ui/icons';
+import { Transition } from '../../components/Dialogs';
 import { USER } from '../../env';
 import { setUser } from '../../actions';
 
@@ -15,10 +16,6 @@ const propTypes = {
   setUser: PropTypes.func.isRequired,
   history: PropTypes.instanceOf(Object).isRequired,
 };
-
-function TransitionDown(props) {
-  return <Slide {...props} direction="down" />;
-}
 
 const styles = theme => ({
   form: {
@@ -200,7 +197,7 @@ class LoginForm extends React.Component {
           }}
           open={isSnackbarOpen}
           onClose={this.handleClose}
-          TransitionComponent={TransitionDown}
+          TransitionComponent={Transition}
           ContentProps={{
             'aria-describedby': 'login-message',
           }}

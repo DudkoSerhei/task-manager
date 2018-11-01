@@ -61,7 +61,13 @@ class TasksPage extends React.Component {
   }
 
   componentDidMount() {
-    this.props.fetchTasks(this.state.currentPage);
+    const { currentPage } = this.state;
+
+    const data = {
+      page: currentPage,
+    };
+
+    this.props.fetchTasks(data);
   }
 
   componentDidUpdate() {

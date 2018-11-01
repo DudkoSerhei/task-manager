@@ -1,6 +1,22 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Slide from '@material-ui/core/Slide';
 
-export default function Transition(props) {
-  return <Slide direction="up" {...props} />;
+const propTypes = {
+  direction: PropTypes.string,
+};
+
+const defaultProps = {
+  direction: 'up',
+};
+
+function Transition(props) {
+  const { direction } = props;
+
+  return <Slide direction={direction} {...props} />;
 }
+
+Transition.propTypes = propTypes;
+Transition.defaultProps = defaultProps;
+
+export default Transition;

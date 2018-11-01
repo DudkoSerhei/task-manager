@@ -6,6 +6,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import Transition from './Transition';
+import ViewDialog from './ViewDialog';
 import { createTask } from '../../actions';
 
 const propTypes = {
@@ -68,18 +69,8 @@ const styles = theme => ({
   buttonIcon: {
     marginLeft: 'auto',
   },
-  column: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '20px',
-  },
-  title: {
-    color: theme.palette.primary.dark,
-    fontSize: '16px',
-  },
-  text: {
-    color: theme.palette.primary.gray,
-    fontSize: '14px',
+  file: {
+    marginLeft: '30px',
   },
 });
 
@@ -165,7 +156,7 @@ class CreateTaskDialog extends React.Component {
       username: userName,
       email,
       text: description,
-      image: file.url,
+      image: file,
     };
 
     this.props.createTask(task);
@@ -239,6 +230,7 @@ class CreateTaskDialog extends React.Component {
               <TextField
                 value={email}
                 label="Email"
+                type="email"
                 className={classes.textField}
                 onChange={this.handleEmailChange}
                 onBlur={this.onEmailValidate}
@@ -314,45 +306,14 @@ class CreateTaskDialog extends React.Component {
             Create
           </Button>
         </DialogActions>
-        <Dialog
-          open={isViewOpen}
-          TransitionComponent={Transition}
-          keepMounted
-          fullWidth
+        <ViewDialog
+          isOpen={isViewOpen}
           onClose={this.handleViewClose}
-        >
-          <DialogTitle className={classes.dialogTitle}>
-            View task
-          </DialogTitle>
-          <DialogContent style={{ height: '500px' }}>
-            <div className={classes.column}>
-              <Typography className={classes.title}>Username</Typography>
-              <Typography className={classes.text}>{userName}</Typography>
-            </div>
-            <div className={classes.column}>
-              <Typography className={classes.title}>Email</Typography>
-              <Typography className={classes.text}>{email}</Typography>
-            </div>
-            <div className={classes.column}>
-              <Typography className={classes.title}>Description</Typography>
-              <Typography className={classes.text}>{description}</Typography>
-            </div>
-            <div className={classes.column}>
-              <Typography className={classes.title}>Filename</Typography>
-              <Typography className={classes.text}>{file.url}</Typography>
-            </div>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              className={classes.formButton}
-              variant="outlined"
-              onClick={this.handleViewClose}
-              style={{ width: '100px' }}
-            >
-              Ok
-            </Button>
-          </DialogActions>
-        </Dialog>
+          userName={userName}
+          email={email}
+          description={description}
+          url={file.url}
+        />
       </Dialog>
     );
   }
