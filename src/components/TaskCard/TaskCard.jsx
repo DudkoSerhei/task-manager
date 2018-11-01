@@ -1,9 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'lodash/fp';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { Card, CardMedia, CardContent, Typography, IconButton, Badge, Tooltip, CardActions, Menu, MenuItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { CheckCircle, Clear, MoreVert, Edit } from '@material-ui/icons';
 import { EditDialog } from '../../components/Dialogs';
+import { editTask } from '../../actions';
 import defaultSrc from '../../images/task.png';
 import Utils from '../../utils';
 
@@ -15,6 +18,7 @@ const propTypes = {
   src: PropTypes.string,
   status: PropTypes.number,
   edit: PropTypes.bool,
+  editTask: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
@@ -75,16 +79,31 @@ class TaskCard extends React.Component {
     isEditDialogOpen: false,
   }
 
+  onEditTask = () => {
+    const { id } = this.props;
+    const { currentStatus } = this.state;
+
+    const task = {
+      status: currentStatus,
+    };
+
+    this.props.editTask(id, task);
+  };
+
   onStatusAprove = () => {
     this.setState({
       currentStatus: 10,
     });
+
+    this.onEditTask();
   };
 
   onStatusUndone = () => {
     this.setState({
       currentStatus: 0,
     });
+
+    this.onEditTask();
   };
 
   onMenuOpen = (event) => {
@@ -199,6 +218,15 @@ class TaskCard extends React.Component {
 TaskCard.propTypes = propTypes;
 TaskCard.defaultProps = defaultProps;
 
-const enhance = withStyles(styles);
+const stateToProps = () => ({});
+
+const dispatchToProps = {
+  editTask,
+};
+
+const enhance = compose(
+  withStyles(styles),
+  connect(stateToProps, dispatchToProps),
+);
 
 export default enhance(TaskCard);

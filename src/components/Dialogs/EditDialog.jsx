@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { compose } from 'lodash/fp';
-// import { connect } from 'react-redux';
+import { compose } from 'lodash/fp';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, MenuItem } from '@material-ui/core';
 import Transition from './Transition';
+import { editTask } from '../../actions';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
@@ -13,6 +14,7 @@ const propTypes = {
   text: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
   status: PropTypes.number.isRequired,
+  editTask: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
@@ -101,12 +103,12 @@ class FilterDialog extends React.Component {
     const { id } = this.props;
     const { currentStatus, currentDescription } = this.state;
 
-    const data = {
+    const task = {
       text: currentDescription,
       status: currentStatus,
     };
 
-    console.log(id, data, 'DATA');
+    this.props.editTask(id, task);
     this.props.onClose();
   }
 
@@ -188,12 +190,15 @@ class FilterDialog extends React.Component {
 FilterDialog.propTypes = propTypes;
 FilterDialog.defaultProps = defaultProps;
 
-// const stateToProps = () => ({});
+const stateToProps = () => ({});
 
-// const dispatchToProps = dispatch => ({
-//   setFilters: (...args) => dispatch(setFilters(...args)),
-// });
+const dispatchToProps = {
+  editTask,
+};
 
-const enhance = withStyles(styles);
+const enhance = compose(
+  withStyles(styles),
+  connect(stateToProps, dispatchToProps),
+);
 
 export default enhance(FilterDialog);

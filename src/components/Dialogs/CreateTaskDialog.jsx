@@ -1,13 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'lodash/fp';
+import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import Transition from './Transition';
+import { createTask } from '../../actions';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
+  createTask: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
@@ -157,14 +161,15 @@ class CreateTaskDialog extends React.Component {
       userName, email, description, file,
     } = this.state;
 
-    const data = {
+    const task = {
       username: userName,
       email,
       text: description,
       image: file.url,
     };
 
-    console.log(data, 'data');
+    this.props.createTask(task);
+    this.handleClose();
   };
 
   clickAttachmentInput = () => {
@@ -266,7 +271,7 @@ class CreateTaskDialog extends React.Component {
                 <AddIcon className={classes.buttonIcon} />
               </Button>
               {Object.keys(file).length !== 0 &&
-                <Typography className={classes.file} variant="p">{file.url}</Typography>
+                <Typography className={classes.file} variant="body1">{file.url}</Typography>
               }
             </div>
             <input
@@ -356,6 +361,15 @@ class CreateTaskDialog extends React.Component {
 CreateTaskDialog.propTypes = propTypes;
 CreateTaskDialog.defaultProps = defaultProps;
 
-const enhance = withStyles(styles);
+const stateToProps = () => ({});
+
+const dispatchToProps = {
+  createTask,
+};
+
+const enhance = compose(
+  withStyles(styles),
+  connect(stateToProps, dispatchToProps),
+);
 
 export default enhance(CreateTaskDialog);
