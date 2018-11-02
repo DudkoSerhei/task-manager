@@ -79,7 +79,7 @@ class FilterDialog extends React.Component {
 
   handleStatus = (event) => {
     this.setState({
-      currentStatus: event.target.value,
+      currentStatus: +event.target.value,
     });
   };
 
@@ -92,7 +92,7 @@ class FilterDialog extends React.Component {
   handleClose = () => {
     const { status, text } = this.props;
     this.setState({
-      currentStatus: status,
+      currentStatus: +status,
       currentDescription: text,
     });
 
@@ -104,8 +104,8 @@ class FilterDialog extends React.Component {
     const { currentStatus, currentDescription } = this.state;
 
     const task = {
-      text: currentDescription,
       status: currentStatus,
+      text: currentDescription,
     };
 
     this.props.editTask(id, task);

@@ -11,10 +11,10 @@ import defaultSrc from '../../images/task.png';
 import Utils from '../../utils';
 
 const propTypes = {
-  id: PropTypes.number.isRequired,
-  userName: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
+  id: PropTypes.number,
+  userName: PropTypes.string,
+  email: PropTypes.string,
+  description: PropTypes.string,
   src: PropTypes.string,
   status: PropTypes.number,
   edit: PropTypes.bool,
@@ -23,6 +23,10 @@ const propTypes = {
 };
 
 const defaultProps = {
+  id: 0,
+  userName: '',
+  description: '',
+  email: '',
   src: defaultSrc,
   status: 0,
   edit: false,
@@ -39,6 +43,7 @@ const styles = theme => ({
   },
   media: {
     width: '220px',
+    minWidth: '220px',
     maxHeight: '160px',
     borderRadius: '0 5px 5px 0',
   },
@@ -64,8 +69,8 @@ const styles = theme => ({
   },
   cardContent: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
+    top: 0,
+    right: '220px',
   },
   actionColor: {
     color: theme.palette.primary.main,
@@ -74,36 +79,28 @@ const styles = theme => ({
 
 class TaskCard extends React.Component {
   state = {
-    currentStatus: this.props.status,
     anchorEl: null,
     isEditDialogOpen: false,
   }
 
-  onEditTask = () => {
-    const { id } = this.props;
-    const { currentStatus } = this.state;
+  onStatusAprove = () => {
+    const { id, description } = this.props;
 
     const task = {
-      status: currentStatus,
+      status: 10,
+      text: description,
     };
-
     this.props.editTask(id, task);
   };
 
-  onStatusAprove = () => {
-    this.setState({
-      currentStatus: 10,
-    });
-
-    this.onEditTask();
-  };
-
   onStatusUndone = () => {
-    this.setState({
-      currentStatus: 0,
-    });
+    const { id, description } = this.props;
 
-    this.onEditTask();
+    const task = {
+      status: 0,
+      text: description,
+    };
+    this.props.editTask(id, task);
   };
 
   onMenuOpen = (event) => {
@@ -129,14 +126,14 @@ class TaskCard extends React.Component {
   render() {
     const {
       userName, email, description,
-      edit, classes, src, id,
+      edit, classes, src, id, status,
     } = this.props;
-    const { anchorEl, currentStatus, isEditDialogOpen } = this.state;
+    const { anchorEl, isEditDialogOpen } = this.state;
 
     return (
       <Card className={classes.card}>
         <CardContent>
-          {currentStatus === 10 ?
+          {status === 10 ?
             <Badge classes={{ badge: classes.badge }} badgeContent={<CheckCircle />}>
               <Typography component="h3" className={classes.userName}>
                 {userName}
@@ -150,7 +147,7 @@ class TaskCard extends React.Component {
             {email}
           </Typography>
           <Typography component="p" className={classes.description}>
-            {Utils.cutText(description, 500)}
+            {Utils.cutText(description, 350)}
           </Typography>
         </CardContent>
         <CardMedia
@@ -162,11 +159,11 @@ class TaskCard extends React.Component {
         />
         {edit &&
           <CardActions className={classes.cardContent}>
-            <Tooltip title={currentStatus !== 10 ? 'Done' : 'Undone'}>
+            <Tooltip title={status !== 10 ? 'Done' : 'Undone'}>
               <IconButton
-                onClick={currentStatus !== 10 ? this.onStatusAprove : this.onStatusUndone}
+                onClick={status !== 10 ? this.onStatusAprove : this.onStatusUndone}
               >
-                {currentStatus !== 10 ?
+                {status !== 10 ?
                   <CheckCircle className={classes.actionColor} /> :
                   <Clear className={classes.actionColor} />
                 }
@@ -208,7 +205,7 @@ class TaskCard extends React.Component {
           id={id}
           userName={userName}
           text={description}
-          status={currentStatus}
+          status={status}
         />
       </Card>
     );

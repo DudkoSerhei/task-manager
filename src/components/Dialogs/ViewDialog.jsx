@@ -10,7 +10,14 @@ const propTypes = {
   userName: PropTypes.string,
   email: PropTypes.string,
   description: PropTypes.string,
-  url: PropTypes.string,
+  file: PropTypes.shape({
+    name: PropTypes.string,
+    lastModified: PropTypes.number,
+    lastModifiedDate: PropTypes.instanceOf(Date),
+    size: PropTypes.number,
+    type: PropTypes.string,
+    webkitRelativePath: PropTypes.string,
+  }),
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
@@ -20,7 +27,7 @@ const defaultProps = {
   userName: '',
   email: '',
   description: '',
-  url: '',
+  file: {},
 };
 
 const styles = theme => ({
@@ -59,7 +66,7 @@ const styles = theme => ({
 function ViewDialog(props) {
   const {
     isOpen, onClose, userName,
-    email, description, url, classes,
+    email, description, file, classes,
   } = props;
 
   return (
@@ -88,7 +95,7 @@ function ViewDialog(props) {
         </div>
         <div className={classes.column}>
           <Typography className={classes.title}>Filename</Typography>
-          <Typography className={classes.text}>{url}</Typography>
+          <Typography className={classes.text}>{file.name}</Typography>
         </div>
       </DialogContent>
       <DialogActions>

@@ -1,15 +1,17 @@
 import axios from 'axios';
 import { API_URL, DEVELOPER } from '../env';
 import ACTIONS from '../data/TasksConstants';
+import Utils from '../utils';
 
 export const fetchTasksStart = () => ({
   type: ACTIONS.FETCH_TASKS_START,
 });
 
-export const fetchTasksSuccess = tasks => ({
+export const fetchTasksSuccess = message => ({
   type: ACTIONS.FETCH_TASKS_SUCCESS,
   payload: {
-    tasks,
+    tasks: message.tasks,
+    count: message.total_task_count,
   },
 });
 
@@ -20,17 +22,11 @@ export const fetchTasksError = error => ({
   },
 });
 
-export const fetchTasks = (page, sortDirection, sortField) => (dispatch) => {
-  const params = {
-    page,
-    sort_direction: sortDirection,
-    sort_field: sortField,
-  };
-
+export const fetchTasks = params => (dispatch) => {
   dispatch(fetchTasksStart());
   axios.get(`${API_URL}/${DEVELOPER}`, { params })
     .then((response) => {
-      dispatch(fetchTasksSuccess(response.data));
+      dispatch(fetchTasksSuccess(response.data.message));
     })
     .catch(error => dispatch(fetchTasksError(error)));
 };
@@ -58,15 +54,10 @@ export const createTaskError = error => ({
 });
 
 export const createTask = task => (dispatch) => {
-  const data = {
-    username: task.username,
-    email: task.email,
-    text: task.text,
-    image: task.image,
-  };
+  const config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
   dispatch(createTaskStart());
-  axios.post(`${API_URL}/create/${DEVELOPER}`, data)
+  axios.post(`${API_URL}/create/${DEVELOPER}`, task, config)
     .then((response) => {
       dispatch(createTaskSuccess(response.data));
     })
@@ -92,13 +83,11 @@ export const editTaskError = error => ({
 });
 
 export const editTask = (id, task) => (dispatch) => {
-  const data = {
-    status: task.status,
-    text: task.text,
-  };
+  const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+  const data = Utils.sortData(task);
 
   dispatch(editTaskStart());
-  axios.post(`${API_URL}/edit/${id}/${DEVELOPER}`, data)
+  axios.post(`${API_URL}/edit/${id}/${DEVELOPER}`, data, config)
     .then((response) => {
       dispatch(editTaskSuccess(response.data));
     })

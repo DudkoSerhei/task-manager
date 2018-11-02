@@ -21,10 +21,9 @@ const styles = theme => ({
   content: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     width: '100%',
     height: '100%',
+    minHeight: '92vh',
     padding: '50px 200px',
   },
 });

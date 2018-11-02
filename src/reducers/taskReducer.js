@@ -5,6 +5,7 @@ const INITIAL_STATE = {
   isFetching: false,
   byId: {},
   filters: {},
+  count: 0,
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -19,6 +20,7 @@ export default (state = INITIAL_STATE, action) => {
         ...state,
         byId: Utils.fromArray('id', action.payload.tasks),
         isFetching: false,
+        count: action.payload.count,
       };
     case ACTIONS.FETCH_TASKS_ERROR:
       return {
@@ -41,7 +43,7 @@ export default (state = INITIAL_STATE, action) => {
         isFetching: false,
         byId: {
           ...state.byId,
-          [action.payload.task.id]: action.payload.task,
+          [action.payload.message.id]: action.payload.message,
         },
       };
     case ACTIONS.CREATE_TASK_ERROR:
@@ -59,10 +61,6 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isFetching: false,
-        byId: {
-          ...state.byId,
-          [action.payload.task.id]: action.payload.task,
-        },
       };
     case ACTIONS.EDIT_TASK_ERROR:
       return {

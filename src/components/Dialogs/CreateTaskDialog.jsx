@@ -8,6 +8,7 @@ import AddIcon from '@material-ui/icons/Add';
 import Transition from './Transition';
 import ViewDialog from './ViewDialog';
 import { createTask } from '../../actions';
+import Utils from '../../utils';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
@@ -148,18 +149,13 @@ class CreateTaskDialog extends React.Component {
   };
 
   handleCreate = () => {
-    const {
-      userName, email, description, file,
-    } = this.state;
+    const { file } = this.state;
 
-    const task = {
-      username: userName,
-      email,
-      text: description,
-      image: file,
-    };
+    const formData = new FormData(document.forms.task);
 
-    this.props.createTask(task);
+    formData.append('image', file);
+
+    this.props.createTask(formData);
     this.handleClose();
   };
 
@@ -169,13 +165,10 @@ class CreateTaskDialog extends React.Component {
 
   handleChangeFile = (event) => {
     const file = event.target.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
 
-    this.setState({
-      file: { url: file.name, data: formData },
-      fileError: false,
-    });
+    console.log(Utils.checkImageSize(file));
+
+    this.setState({ file, fileError: false });
   };
 
   handlePreview = () => {
@@ -214,10 +207,15 @@ class CreateTaskDialog extends React.Component {
           Create new task
         </DialogTitle>
         <DialogContent className={classes.dialogContent}>
-          <form className={classes.form} onSubmit={this.handleCreate}>
+          <form
+            className={classes.form}
+            onSubmit={this.handleCreate}
+            name="task"
+          >
             <div className={classes.row}>
               <TextField
                 value={userName}
+                name="username"
                 label="User name"
                 className={classes.textField}
                 onChange={this.handleUserNameChange}
@@ -229,6 +227,7 @@ class CreateTaskDialog extends React.Component {
               />
               <TextField
                 value={email}
+                name="email"
                 label="Email"
                 type="email"
                 className={classes.textField}
@@ -242,6 +241,7 @@ class CreateTaskDialog extends React.Component {
             </div>
             <TextField
               value={description}
+              name="text"
               label="Description"
               className={classes.textFieldMulti}
               onChange={this.handleDescriptionChange}
@@ -262,8 +262,8 @@ class CreateTaskDialog extends React.Component {
                 Upload
                 <AddIcon className={classes.buttonIcon} />
               </Button>
-              {Object.keys(file).length !== 0 &&
-                <Typography className={classes.file} variant="body1">{file.url}</Typography>
+              {file && file.name &&
+                <Typography className={classes.file} variant="body1">{file.name}</Typography>
               }
             </div>
             <input
@@ -312,7 +312,7 @@ class CreateTaskDialog extends React.Component {
           userName={userName}
           email={email}
           description={description}
-          url={file.url}
+          file={file}
         />
       </Dialog>
     );

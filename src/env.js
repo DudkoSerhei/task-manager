@@ -5,6 +5,7 @@ const config = {
     password: '123',
   },
   DEVELOPER: '?developer=Serhei',
+  TOKEN: 'beejee',
 };
 
 module.exports = config;
