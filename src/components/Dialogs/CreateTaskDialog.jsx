@@ -7,20 +7,17 @@ import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, T
 import AddIcon from '@material-ui/icons/Add';
 import Transition from './Transition';
 import ViewDialog from './ViewDialog';
-import { createTask, fetchTasks } from '../../actions';
+import { createTask } from '../../actions';
 import Utils from '../../utils';
 
 const propTypes = {
-  page: PropTypes.number,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
   createTask: PropTypes.func.isRequired,
-  fetchTasks: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 const defaultProps = {
-  page: 1,
   onClose: () => {},
 };
 
@@ -104,7 +101,8 @@ class CreateTaskDialog extends React.Component {
   };
 
   onEmailValidate = () => {
-    if (this.state.email === '') {
+    const { email } = this.state;
+    if (email === '' || !Utils.validateEmail(email)) {
       this.setState({ emailError: true });
     } else {
       this.setState({ emailError: false });
@@ -152,19 +150,16 @@ class CreateTaskDialog extends React.Component {
   };
 
   handleCreate = () => {
-    const { page } = this.props;
     const { file } = this.state;
 
     const formData = new FormData(document.forms.task);
-    const FILE = Utils.checkImageSize(file, value => value);
 
-    formData.append('image', FILE);
+    Utils.checkImageSize(file, (value) => {
+      formData.append('image', value);
 
-    const data = {
-      page,
-    };
+      this.props.createTask(formData);
+    });
 
-    Utils.invokeAll(this.props.createTask(formData), this.props.fetchTasks(data));
     this.handleClose();
   };
 
@@ -329,13 +324,10 @@ class CreateTaskDialog extends React.Component {
 CreateTaskDialog.propTypes = propTypes;
 CreateTaskDialog.defaultProps = defaultProps;
 
-const stateToProps = state => ({
-  page: state.tasks.page,
-});
+const stateToProps = () => ({});
 
 const dispatchToProps = dispatch => ({
   createTask: (...args) => dispatch(createTask(...args)),
-  fetchTasks: (...args) => dispatch(fetchTasks(...args)),
 });
 
 const enhance = compose(

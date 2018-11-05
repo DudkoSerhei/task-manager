@@ -6,7 +6,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Card, CardMedia, CardContent, Typography, IconButton, Badge, Tooltip, CardActions, Menu, MenuItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { CheckCircle, Clear, MoreVert, Edit } from '@material-ui/icons';
 import { EditDialog } from '../../components/Dialogs';
-import { editTask, fetchTasks } from '../../actions';
+import { editTask } from '../../actions';
 import defaultSrc from '../../images/task.png';
 import Utils from '../../utils';
 
@@ -18,8 +18,6 @@ const propTypes = {
   src: PropTypes.string,
   status: PropTypes.number,
   edit: PropTypes.bool,
-  page: PropTypes.number,
-  fetchTasks: PropTypes.func.isRequired,
   editTask: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
@@ -32,7 +30,6 @@ const defaultProps = {
   src: defaultSrc,
   status: 0,
   edit: false,
-  page: 1,
 };
 
 const styles = theme => ({
@@ -87,33 +84,25 @@ class TaskCard extends React.Component {
   }
 
   onStatusAprove = () => {
-    const { id, description, page } = this.props;
+    const { id, description } = this.props;
 
     const task = {
       status: 10,
       text: description,
     };
 
-    const data = {
-      page,
-    };
-
-    Utils.invokeAll(this.props.editTask(id, task), this.props.fetchTasks(data));
+    this.props.editTask(id, task);
   };
 
   onStatusUndone = () => {
-    const { id, description, page } = this.props;
+    const { id, description } = this.props;
 
     const task = {
       status: 0,
       text: description,
     };
 
-    const data = {
-      page,
-    };
-
-    Utils.invokeAll(this.props.editTask(id, task), this.props.fetchTasks(data));
+    this.props.editTask(id, task);
   };
 
   onMenuOpen = (event) => {
@@ -228,13 +217,10 @@ class TaskCard extends React.Component {
 TaskCard.propTypes = propTypes;
 TaskCard.defaultProps = defaultProps;
 
-const stateToProps = state => ({
-  page: state.tasks.page,
-});
+const stateToProps = () => ({});
 
 const dispatchToProps = dispatch => ({
   editTask: (...args) => dispatch(editTask(...args)),
-  fetchTasks: (...args) => dispatch(fetchTasks(...args)),
 });
 
 const enhance = compose(

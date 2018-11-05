@@ -18,7 +18,7 @@ export const fetchTasksSuccess = message => ({
 export const fetchTasksError = error => ({
   type: ACTIONS.FETCH_TASKS_ERROR,
   payload: {
-    error,
+    error: error.message,
   },
 });
 
@@ -42,14 +42,14 @@ export const createTaskStart = () => ({
 export const createTaskSuccess = task => ({
   type: ACTIONS.CREATE_TASK_SUCCESS,
   payload: {
-    task,
+    task: task.message,
   },
 });
 
 export const createTaskError = error => ({
   type: ACTIONS.CREATE_TASK_ERROR,
   payload: {
-    error,
+    error: error.message,
   },
 });
 
@@ -68,9 +68,11 @@ export const editTaskStart = () => ({
   type: ACTIONS.EDIT_TASK_START,
 });
 
-export const editTaskSuccess = message => ({
+export const editTaskSuccess = (id, task, message) => ({
   type: ACTIONS.EDIT_TASK_SUCCESS,
   payload: {
+    id,
+    task,
     message,
   },
 });
@@ -78,7 +80,7 @@ export const editTaskSuccess = message => ({
 export const editTaskError = error => ({
   type: ACTIONS.EDIT_TASK_ERROR,
   payload: {
-    error,
+    error: error.message,
   },
 });
 
@@ -89,7 +91,7 @@ export const editTask = (id, task) => (dispatch) => {
   dispatch(editTaskStart());
   axios.post(`${API_URL}/edit/${id}/${DEVELOPER}`, data, config)
     .then((response) => {
-      dispatch(editTaskSuccess(response.data.status));
+      dispatch(editTaskSuccess(id, task, response.data.status));
     })
     .catch(error => dispatch(editTaskError(error)));
 };

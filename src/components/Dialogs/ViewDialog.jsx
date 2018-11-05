@@ -70,7 +70,8 @@ const styles = theme => ({
 
 class ViewDialog extends React.Component {
   onImageUpload = (file) => {
-    const img = document.querySelector('img');
+    const { classes } = this.props;
+    const img = document.getElementsByClassName(classes.image);
     const fileReader = new FileReader();
 
     fileReader.addEventListener('load', () => {

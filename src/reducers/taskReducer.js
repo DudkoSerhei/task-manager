@@ -3,7 +3,7 @@ import Utils from '../utils';
 
 const INITIAL_STATE = {
   isFetching: false,
-  byId: {},
+  taskbyId: {},
   filters: {},
   count: 0,
 };
@@ -18,7 +18,7 @@ export default (state = INITIAL_STATE, action) => {
     case ACTIONS.FETCH_TASKS_SUCCESS:
       return {
         ...state,
-        byId: Utils.fromArray('id', action.payload.tasks),
+        taskbyId: Utils.fromArray('id', action.payload.tasks),
         isFetching: false,
         count: action.payload.count,
       };
@@ -41,9 +41,9 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isFetching: false,
-        byId: {
-          ...state.byId,
-          [action.payload.message.id]: action.payload.message,
+        taskbyId: {
+          ...state.taskbyId,
+          [action.payload.task.id]: action.payload.task,
         },
       };
     case ACTIONS.CREATE_TASK_ERROR:
@@ -61,7 +61,14 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isFetching: false,
-        byId: { ...state.byId },
+        taskbyId: {
+          ...state.taskbyId,
+          [action.payload.id]: {
+            ...state.taskbyId[action.payload.id],
+            status: action.payload.task.status,
+            text: action.payload.task.text,
+          },
+        },
         message: action.payload.message,
       };
     case ACTIONS.EDIT_TASK_ERROR:

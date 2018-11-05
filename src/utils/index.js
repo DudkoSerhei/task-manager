@@ -44,9 +44,7 @@ const checkImageSize = (file, callback) => {
             const { width, height } = image;
   
               if (width >= 320 && height >= 240) {
-                canvas.width = 320;
-                canvas.height = 240;
-                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+                canvas.getContext('2d').drawImage(image, 0, 0, width, height, 0, 0, 320, 240);
   
                 const blobBin = atob(canvas.toDataURL(file.type).split(',')[1]);
                 const array = [];
@@ -59,19 +57,16 @@ const checkImageSize = (file, callback) => {
               } else {
                 resizeImage = file;
               }
-              callback(resizeImage);
+              return callback(resizeImage);
           };
         };
         image.src = readerEvent.target.result;
-        imageLoader(image, value => callback(value));
+        imageLoader(image, callback);
       };
     };
     fileReader.readAsDataURL(file);
-    fileLoader(fileReader, value => {
-      callback(value);
-    });
+    return fileLoader(fileReader, callback);
   }
-  callback();
 };
 
 function encode(str) {
@@ -113,6 +108,11 @@ const sortData = (data) => {
   return formData;
 };
 
+const validateEmail = (email) => {
+  const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
 const Utils = {
   invokeAll,
   cutText,
@@ -122,6 +122,7 @@ const Utils = {
   sortData,
   encode,
   checkImageSize,
+  validateEmail,
 };
 
 export default Utils;
