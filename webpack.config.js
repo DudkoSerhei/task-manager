@@ -1,15 +1,18 @@
 var webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/'
   },
   devServer: {
     contentBase: "./public",
+    historyApiFallback: true,
     hot: true
   },
   module: {
@@ -47,7 +50,10 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   plugins: [
-    new ExtractTextPlugin("styles.css"),
-    new webpack.HotModuleReplacementPlugin()
+    new ExtractTextPlugin("./public/styles.css"),
+    new webpack.HotModuleReplacementPlugin(),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+    })
   ]
 };

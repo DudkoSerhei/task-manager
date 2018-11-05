@@ -1,4 +1,4 @@
-import { fetchTasks, setFilters, createTask, editTask } from './taskAction';
+import { fetchTasks, setFilters, createTask, editTask, setPage } from './taskAction';
 import setUser from './authAction';
 
 export {
@@ -7,4 +7,5 @@ export {
   setUser,
   createTask,
   editTask,
+  setPage,
 };

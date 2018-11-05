@@ -61,12 +61,19 @@ export default (state = INITIAL_STATE, action) => {
       return {
         ...state,
         isFetching: false,
+        byId: { ...state.byId },
+        message: action.payload.message,
       };
     case ACTIONS.EDIT_TASK_ERROR:
       return {
         ...state,
         isFetching: false,
         error: action.payload.error,
+      };
+    case ACTIONS.SET_PAGE:
+      return {
+        ...state,
+        page: action.page,
       };
     default:
       return state;

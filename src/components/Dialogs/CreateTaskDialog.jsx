@@ -7,17 +7,20 @@ import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, T
 import AddIcon from '@material-ui/icons/Add';
 import Transition from './Transition';
 import ViewDialog from './ViewDialog';
-import { createTask } from '../../actions';
+import { createTask, fetchTasks } from '../../actions';
 import Utils from '../../utils';
 
 const propTypes = {
+  page: PropTypes.number,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
   createTask: PropTypes.func.isRequired,
+  fetchTasks: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 const defaultProps = {
+  page: 1,
   onClose: () => {},
 };
 
@@ -149,13 +152,19 @@ class CreateTaskDialog extends React.Component {
   };
 
   handleCreate = () => {
+    const { page } = this.props;
     const { file } = this.state;
 
     const formData = new FormData(document.forms.task);
+    const FILE = Utils.checkImageSize(file, value => value);
 
-    formData.append('image', file);
+    formData.append('image', FILE);
 
-    this.props.createTask(formData);
+    const data = {
+      page,
+    };
+
+    Utils.invokeAll(this.props.createTask(formData), this.props.fetchTasks(data));
     this.handleClose();
   };
 
@@ -165,8 +174,6 @@ class CreateTaskDialog extends React.Component {
 
   handleChangeFile = (event) => {
     const file = event.target.files[0];
-
-    console.log(Utils.checkImageSize(file));
 
     this.setState({ file, fileError: false });
   };
@@ -322,11 +329,14 @@ class CreateTaskDialog extends React.Component {
 CreateTaskDialog.propTypes = propTypes;
 CreateTaskDialog.defaultProps = defaultProps;
 
-const stateToProps = () => ({});
+const stateToProps = state => ({
+  page: state.tasks.page,
+});
 
-const dispatchToProps = {
-  createTask,
-};
+const dispatchToProps = dispatch => ({
+  createTask: (...args) => dispatch(createTask(...args)),
+  fetchTasks: (...args) => dispatch(fetchTasks(...args)),
+});
 
 const enhance = compose(
   withStyles(styles),

@@ -5,17 +5,20 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, MenuItem } from '@material-ui/core';
 import Transition from './Transition';
-import { setFilters } from '../../actions';
+import { setFilters, fetchTasks } from '../../actions';
 
 const propTypes = {
+  page: PropTypes.number,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
   setFilters: PropTypes.func.isRequired,
+  fetchTasks: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 const defaultProps = {
   onClose: () => {},
+  page: 1,
 };
 
 const styles = theme => ({
@@ -46,10 +49,16 @@ const styles = theme => ({
       margin: '0 auto 0 22px',
     },
   },
+  input: {
+    textTransform: 'capitalize',
+  },
+  item: {
+    textTransform: 'capitalize',
+  },
 });
 
-const FILTERS = ['UserName', 'Email', 'Status'];
-const SORT = ['Ascending', 'Decrease'];
+const FILTERS = ['username', 'email', 'status'];
+const SORT = ['ascending', 'descrease'];
 
 const defaultValues = () => ({
   filter: FILTERS[0],
@@ -97,12 +106,21 @@ class FilterDialog extends React.Component {
   }
 
   handleApply = () => {
+    const { page } = this.props;
     const { currentFilter, currentSort, values } = this.state;
+    const sortDirection = currentSort === 'ascending' ? 'asc' : 'desc';
 
     this.setState({
-      values: { filter: currentFilter, sort: currentSort },
+      values: { filter: currentFilter, sort: sortDirection },
     });
 
+    const data = {
+      page,
+      sort_field: currentFilter,
+      sort_direction: sortDirection,
+    };
+
+    this.props.fetchTasks(data);
     this.props.setFilters(values);
     this.props.onClose();
   }
@@ -135,9 +153,18 @@ class FilterDialog extends React.Component {
             onChange={this.handleFilter}
             helperText="Please select your filter"
             variant="outlined"
+            InputProps={{
+              classes: {
+                root: classes.input,
+              },
+            }}
           >
             {FILTERS.map(filter => (
-              <MenuItem key={filter} value={filter}>
+              <MenuItem
+                key={filter}
+                value={filter}
+                className={classes.item}
+              >
                 {filter}
               </MenuItem>
             ))}
@@ -150,9 +177,18 @@ class FilterDialog extends React.Component {
             onChange={this.handleSort}
             helperText="Please select your sort type"
             variant="outlined"
+            InputProps={{
+              classes: {
+                root: classes.input,
+              },
+            }}
           >
             {SORT.map(sort => (
-              <MenuItem key={sort} value={sort}>
+              <MenuItem
+                key={sort}
+                value={sort}
+                className={classes.item}
+              >
                 {sort}
               </MenuItem>
             ))}
@@ -189,10 +225,13 @@ class FilterDialog extends React.Component {
 FilterDialog.propTypes = propTypes;
 FilterDialog.defaultProps = defaultProps;
 
-const stateToProps = () => ({});
+const stateToProps = state => ({
+  page: state.tasks.page,
+});
 
 const dispatchToProps = dispatch => ({
   setFilters: (...args) => dispatch(setFilters(...args)),
+  fetchTasks: (...args) => dispatch(fetchTasks(...args)),
 });
 
 const enhance = compose(

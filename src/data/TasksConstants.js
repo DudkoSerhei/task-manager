@@ -12,5 +12,7 @@ export default {
   EDIT_TASK_START: 'tasks/EDIT_TASK_START',
   EDIT_TASK_SUCCESS: 'tasks/EDIT_TASK_SUCCESS',
   EDIT_TASK_ERROR: 'tasks/EDIT_TASK_ERROR',
+
+  SET_PAGE: 'tasks/SET_PAGE',
 };
 

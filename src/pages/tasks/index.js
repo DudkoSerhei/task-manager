@@ -10,13 +10,14 @@ import TaskCard from '../../components/TaskCard';
 import Pagination from '../../components/Pagination';
 import { CreateTaskDialog } from '../../components/Dialogs';
 import { TaskShape, UserShape } from '../../shapes';
-import { fetchTasks } from '../../actions';
+import { fetchTasks, setPage } from '../../actions';
 import { all, fetchingStatus, totalCount } from '../../selectors';
 
 const propTypes = {
   isFetching: PropTypes.bool,
   tasks: PropTypes.arrayOf(PropTypes.shape(TaskShape)),
   fetchTasks: PropTypes.func.isRequired,
+  setPage: PropTypes.func.isRequired,
   filters: PropTypes.objectOf(PropTypes.string),
   user: PropTypes.shape(UserShape),
   count: PropTypes.number,
@@ -52,6 +53,9 @@ const styles = theme => ({
   pagination: {
     marginTop: 'auto',
   },
+  progress: {
+    margin: '0 auto',
+  },
 });
 
 class TasksPage extends React.Component {
@@ -61,29 +65,26 @@ class TasksPage extends React.Component {
   }
 
   componentDidMount() {
-    const { currentPage } = this.state;
-
-    const data = {
-      page: currentPage,
-    };
-
-    console.log(this.props.filters);
-
-    this.props.fetchTasks(data);
+    this.handleFetchTasks(this.state.currentPage);
   }
 
-  // componentDidUpdate() {
-  //   const { filters } = this.props;
-  //   const { currentPage } = this.state;
+  handleFetchTasks = (page) => {
+    const { filters } = this.props;
 
-  //   const data = {
-  //     page: currentPage,
-  //     sortField: filters.filter,
-  //     sort_direction: filters.sort,
-  //   };
+    const data = {
+      page,
+      sort_field: filters.filter,
+      sort_direction: filters.sort,
+    };
 
-  //   this.props.fetchTasks(data);
-  // }
+    const PAGE = { page };
+
+    if (Object.keys(filters).length !== 0) {
+      this.props.fetchTasks(data);
+    } else {
+      this.props.fetchTasks(PAGE);
+    }
+  }
 
   handleDialogOpen = () => {
     this.setState({
@@ -98,19 +99,31 @@ class TasksPage extends React.Component {
   };
 
   handlePageLeft = () => {
+    const { currentPage } = this.state;
+
     this.setState({
       currentPage: this.state.currentPage - 1,
     });
+
+    this.props.setPage(currentPage);
+    this.handleFetchTasks(currentPage);
   };
 
   handlePageRight = () => {
+    const { currentPage } = this.state;
+
     this.setState({
       currentPage: this.state.currentPage + 1,
     });
+
+    this.props.setPage(currentPage);
+    this.handleFetchTasks(currentPage);
   };
 
   handlePageClick = (currentPage) => {
     this.setState({ currentPage });
+    this.props.setPage(currentPage);
+    this.handleFetchTasks(currentPage);
   };
 
   render() {
@@ -119,8 +132,6 @@ class TasksPage extends React.Component {
       isFetching, count,
     } = this.props;
     const { isOpen, currentPage } = this.state;
-
-    console.log(tasks, 'tasks');
 
     return (
       <Page title="Tasks">
@@ -179,6 +190,7 @@ const stateToProps = state => ({
 
 const dispatchToProps = {
   fetchTasks,
+  setPage,
 };
 
 const enhance = compose(

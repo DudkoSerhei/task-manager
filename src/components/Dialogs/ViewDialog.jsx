@@ -61,54 +61,77 @@ const styles = theme => ({
     color: theme.palette.primary.gray,
     fontSize: '14px',
   },
+  image: {
+    maxWidth: '320px',
+    maxHeight: '240px',
+    marginTop: '10px',
+  },
 });
 
-function ViewDialog(props) {
-  const {
-    isOpen, onClose, userName,
-    email, description, file, classes,
-  } = props;
+class ViewDialog extends React.Component {
+  onImageUpload = (file) => {
+    const img = document.querySelector('img');
+    const fileReader = new FileReader();
 
-  return (
-    <Dialog
-      open={isOpen}
-      TransitionComponent={Transition}
-      keepMounted
-      fullWidth
-      onClose={onClose}
-    >
-      <DialogTitle className={classes.dialogTitle}>
-        View task
-      </DialogTitle>
-      <DialogContent className={classes.DialogContent}>
-        <div className={classes.column}>
-          <Typography className={classes.title}>Username</Typography>
-          <Typography className={classes.text}>{userName}</Typography>
-        </div>
-        <div className={classes.column}>
-          <Typography className={classes.title}>Email</Typography>
-          <Typography className={classes.text}>{email}</Typography>
-        </div>
-        <div className={classes.column}>
-          <Typography className={classes.title}>Description</Typography>
-          <Typography className={classes.text}>{description}</Typography>
-        </div>
-        <div className={classes.column}>
-          <Typography className={classes.title}>Filename</Typography>
-          <Typography className={classes.text}>{file.name}</Typography>
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          className={classes.formButton}
-          variant="outlined"
-          onClick={onClose}
-        >
-          Ok
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
+    fileReader.addEventListener('load', () => {
+      img.src = fileReader.result;
+    }, false);
+
+    if (file && file.type && file.type.match('image.*')) {
+      fileReader.readAsDataURL(file);
+    }
+
+    return img ? img.src : '';
+  };
+
+  render() {
+    const {
+      isOpen, onClose, userName,
+      email, description, file, classes,
+    } = this.props;
+
+    return (
+      <Dialog
+        open={isOpen}
+        TransitionComponent={Transition}
+        keepMounted
+        fullWidth
+        onClose={onClose}
+      >
+        <DialogTitle className={classes.dialogTitle}>
+          View task
+        </DialogTitle>
+        <DialogContent className={classes.DialogContent}>
+          <div className={classes.column}>
+            <Typography className={classes.title}>Username</Typography>
+            <Typography className={classes.text}>{userName}</Typography>
+          </div>
+          <div className={classes.column}>
+            <Typography className={classes.title}>Email</Typography>
+            <Typography className={classes.text}>{email}</Typography>
+          </div>
+          <div className={classes.column}>
+            <Typography className={classes.title}>Description</Typography>
+            <Typography className={classes.text}>{description}</Typography>
+          </div>
+          <div className={classes.column}>
+            <Typography className={classes.title}>Filename</Typography>
+            <Typography className={classes.text}>{file.name}</Typography>
+            <img src={this.onImageUpload(file)} className={classes.image} alt={file.name} />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            className={classes.formButton}
+            variant="outlined"
+            onClick={onClose}
+          >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 }
 
 ViewDialog.propTypes = propTypes;

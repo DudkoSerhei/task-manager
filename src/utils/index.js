@@ -1,4 +1,5 @@
 /* eslint-disable */
+
 import md5 from 'md5';
 import { TOKEN } from '../env';
 
@@ -28,31 +29,53 @@ const getPages = (count) => {
   return array;
 };
 
-const checkImageSize = (image) => {
-  const _URL = window.URL || window.webkitURL;
+const checkImageSize = (file, callback) => {
+  if (file && file.type && file.type.match('image.*')) {
+    const fileReader = new FileReader();
 
-  const img = new Image();
-  img.onload = function () {
-    if (this.width >= 320 && this.height >= 240) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 240;
-
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-
-      const dataURL = canvas.toDataURL(image.type);
-
-      return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-    } else return image;
-  };
-  img.src = _URL.createObjectURL(image);
+    const fileLoader = (fileReader, callback) => {
+      fileReader.onload = (readerEvent) => {
+        const image = new Image();
+  
+        const imageLoader = (image, callback) => {
+          image.onload = () => {
+            let resizeImage = new Image();
+            const canvas = document.createElement('canvas');
+            const { width, height } = image;
+  
+              if (width >= 320 && height >= 240) {
+                canvas.width = 320;
+                canvas.height = 240;
+                canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+  
+                const blobBin = atob(canvas.toDataURL(file.type).split(',')[1]);
+                const array = [];
+  
+                for (var i = 0; i < blobBin.length; i++) {
+                  array.push(blobBin.charCodeAt(i));
+                }
+  
+                resizeImage = new Blob([new Uint8Array(array)], { type: file.type });
+              } else {
+                resizeImage = file;
+              }
+              callback(resizeImage);
+          };
+        };
+        image.src = readerEvent.target.result;
+        imageLoader(image, value => callback(value));
+      };
+    };
+    fileReader.readAsDataURL(file);
+    fileLoader(fileReader, value => {
+      callback(value);
+    });
+  }
+  callback();
 };
 
-function encode (str) {
-  return encodeURIComponent(str).replace(/[!'()*]/g, function(c) {
-    return '%' + c.charCodeAt(0).toString(16);
-  });
+function encode(str) {
+  return encodeURIComponent(str).replace(/[!'()*]/g, c => `%${c.charCodeAt(0).toString(16)}`);
 }
 
 const getSignature = (data) => {
@@ -90,19 +113,6 @@ const sortData = (data) => {
   return formData;
 };
 
-const getImageSrc = (file) => {
-  const reader  = new FileReader();
-  let src = '';
-
-  reader.onloadend = () => {
-    src = reader.result;
-  }
-
-  reader.readAsDataURL(file);
-
-  return src;
-};
-
 const Utils = {
   invokeAll,
   cutText,
@@ -111,9 +121,7 @@ const Utils = {
   getSignature,
   sortData,
   encode,
-  getImageSrc,
   checkImageSize,
 };
 
 export default Utils;
-

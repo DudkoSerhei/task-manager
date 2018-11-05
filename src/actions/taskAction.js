@@ -68,10 +68,10 @@ export const editTaskStart = () => ({
   type: ACTIONS.EDIT_TASK_START,
 });
 
-export const editTaskSuccess = task => ({
+export const editTaskSuccess = message => ({
   type: ACTIONS.EDIT_TASK_SUCCESS,
   payload: {
-    task,
+    message,
   },
 });
 
@@ -89,7 +89,11 @@ export const editTask = (id, task) => (dispatch) => {
   dispatch(editTaskStart());
   axios.post(`${API_URL}/edit/${id}/${DEVELOPER}`, data, config)
     .then((response) => {
-      dispatch(editTaskSuccess(response.data));
+      dispatch(editTaskSuccess(response.data.status));
     })
     .catch(error => dispatch(editTaskError(error)));
 };
+
+export function setPage(page) {
+  return { type: ACTIONS.SET_PAGE, page };
+}

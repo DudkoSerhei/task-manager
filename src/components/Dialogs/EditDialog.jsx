@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
 import { Dialog, DialogContent, DialogActions, DialogTitle, TextField, Button, MenuItem } from '@material-ui/core';
 import Transition from './Transition';
-import { editTask } from '../../actions';
+import { editTask, fetchTasks } from '../../actions';
+import Utils from '../../utils';
 
 const propTypes = {
   isOpen: PropTypes.bool.isRequired,
@@ -14,12 +15,15 @@ const propTypes = {
   text: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
   status: PropTypes.number.isRequired,
+  page: PropTypes.number,
+  fetchTasks: PropTypes.func.isRequired,
   editTask: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.string).isRequired,
 };
 
 const defaultProps = {
   onClose: () => {},
+  page: 1,
 };
 
 const styles = theme => ({
@@ -100,7 +104,7 @@ class FilterDialog extends React.Component {
   }
 
   handleEdit = () => {
-    const { id } = this.props;
+    const { id, page } = this.props;
     const { currentStatus, currentDescription } = this.state;
 
     const task = {
@@ -108,7 +112,11 @@ class FilterDialog extends React.Component {
       text: currentDescription,
     };
 
-    this.props.editTask(id, task);
+    const data = {
+      page,
+    };
+
+    Utils.invokeAll(this.props.editTask(id, task), this.props.fetchTasks(data));
     this.props.onClose();
   }
 
@@ -190,11 +198,14 @@ class FilterDialog extends React.Component {
 FilterDialog.propTypes = propTypes;
 FilterDialog.defaultProps = defaultProps;
 
-const stateToProps = () => ({});
+const stateToProps = state => ({
+  page: state.tasks.page,
+});
 
-const dispatchToProps = {
-  editTask,
-};
+const dispatchToProps = dispatch => ({
+  editTask: (...args) => dispatch(editTask(...args)),
+  fetchTasks: (...args) => dispatch(fetchTasks(...args)),
+});
 
 const enhance = compose(
   withStyles(styles),

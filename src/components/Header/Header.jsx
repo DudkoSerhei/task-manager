@@ -35,7 +35,7 @@ function Header({ classes, title, history }) {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Tooltip title="Logo">
+        <Tooltip title="Home">
           <IconButton onClick={() => history.push('/')} className={classes.button}>
             <DateRange color="inherit" />
           </IconButton>
